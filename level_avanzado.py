@@ -14,23 +14,60 @@ cuadrícula = [['' for _ in range(tamaño)] for _ in range(tamaño)]
 
 # Función para colocar palabras en la cuadrícula
 def colocar_palabra(palabra):
-    orientaciones = ['H', 'V']  # Horizontal, Vertical
+    orientaciones = ['H', 'V', 'D', 'H_INV', 'V_INV', 'D_INV']  # Horizontal, Vertical, Diagonal, Inversos
     colocada = False
+    palabra_inversa = random.choice([True, False])  # Decidir si la palabra va normal o inversa
+    if palabra_inversa:
+        palabra = palabra[::-1]  # Invertir la palabra si es necesario
+
     while not colocada:
         orientacion = random.choice(orientaciones)
-        if orientacion == 'H':
+        if orientacion == 'H':  # Horizontal
             fila = random.randint(0, tamaño - 1)
             col = random.randint(0, tamaño - len(palabra))
             if all(cuadrícula[fila][col + i] in ('', palabra[i]) for i in range(len(palabra))):
                 for i in range(len(palabra)):
                     cuadrícula[fila][col + i] = palabra[i]
                 colocada = True
-        elif orientacion == 'V':
+
+        elif orientacion == 'V':  # Vertical
             fila = random.randint(0, tamaño - len(palabra))
             col = random.randint(0, tamaño - 1)
             if all(cuadrícula[fila + i][col] in ('', palabra[i]) for i in range(len(palabra))):
                 for i in range(len(palabra)):
                     cuadrícula[fila + i][col] = palabra[i]
+                colocada = True
+
+        elif orientacion == 'D':  # Diagonal (de arriba izquierda a abajo derecha)
+            fila = random.randint(0, tamaño - len(palabra))
+            col = random.randint(0, tamaño - len(palabra))
+            if all(cuadrícula[fila + i][col + i] in ('', palabra[i]) for i in range(len(palabra))):
+                for i in range(len(palabra)):
+                    cuadrícula[fila + i][col + i] = palabra[i]
+                colocada = True
+
+        elif orientacion == 'H_INV':  # Horizontal Inversa (de derecha a izquierda)
+            fila = random.randint(0, tamaño - 1)
+            col = random.randint(len(palabra) - 1, tamaño - 1)
+            if all(cuadrícula[fila][col - i] in ('', palabra[i]) for i in range(len(palabra))):
+                for i in range(len(palabra)):
+                    cuadrícula[fila][col - i] = palabra[i]
+                colocada = True
+
+        elif orientacion == 'V_INV':  # Vertical Inversa (de abajo hacia arriba)
+            fila = random.randint(len(palabra) - 1, tamaño - 1)
+            col = random.randint(0, tamaño - 1)
+            if all(cuadrícula[fila - i][col] in ('', palabra[i]) for i in range(len(palabra))):
+                for i in range(len(palabra)):
+                    cuadrícula[fila - i][col] = palabra[i]
+                colocada = True
+
+        elif orientacion == 'D_INV':  # Diagonal Inversa (de abajo derecha a arriba izquierda)
+            fila = random.randint(len(palabra) - 1, tamaño - 1)
+            col = random.randint(len(palabra) - 1, tamaño - 1)
+            if all(cuadrícula[fila - i][col - i] in ('', palabra[i]) for i in range(len(palabra))):
+                for i in range(len(palabra)):
+                    cuadrícula[fila - i][col - i] = palabra[i]
                 colocada = True
 
 # Colocar todas las palabras en la cuadrícula
@@ -73,7 +110,7 @@ for fila in range(tamaño):
 palabra_x = 10
 palabra_y = imagen_tamaño + 10
 for palabra in palabras:
-    draw.text((palabra_x, palabra_y), f"[    ]  {palabra}", font=font, fill='black')
+    draw.text((palabra_x, palabra_y), f"[     ]   {palabra}", font=font, fill='black')
     palabra_y += 15
     if palabra_y > imagen_tamaño + 120:
         palabra_y = imagen_tamaño + 10
