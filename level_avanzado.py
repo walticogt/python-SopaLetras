@@ -1,123 +1,77 @@
-import random
-from PIL import Image, ImageDraw, ImageFont
+#!/usr/bin/env python3
+"""
+Ejemplo de nivel avanzado: Sopa de letras con todas las orientaciones.
+Tema: Harry Potter - hechizos y personajes.
 
-# Configuración de la sopa de letras
-palabras = [
-    "HARRY", "HERMIONE", "RON", "DUMBLEDORE", "VOLDEMORT", "SNAPE", "EXPELLIARMUS", 
-    "LUMOS", "ACCIO", "WINGARDIUM", "EXPECTO", "PATRONUM", "CRUCIO", "SECTUMSEMPRA", 
-    "BELLATRIX", "DRACO"
-]
-tamaño = 15  # Tamaño de la cuadrícula (15x15)
+Este archivo demuestra cómo usar el generador con máxima dificultad.
+"""
 
-# Crear cuadrícula vacía
-cuadrícula = [['' for _ in range(tamaño)] for _ in range(tamaño)]
+from word_search_generator import WordSearchGenerator
+from config import Config
 
-# Función para colocar palabras en la cuadrícula
-def colocar_palabra(palabra):
-    orientaciones = ['H', 'V', 'D', 'H_INV', 'V_INV', 'D_INV']  # Horizontal, Vertical, Diagonal, Inversos
-    colocada = False
-    palabra_inversa = random.choice([True, False])  # Decidir si la palabra va normal o inversa
-    if palabra_inversa:
-        palabra = palabra[::-1]  # Invertir la palabra si es necesario
 
-    while not colocada:
-        orientacion = random.choice(orientaciones)
-        if orientacion == 'H':  # Horizontal
-            fila = random.randint(0, tamaño - 1)
-            col = random.randint(0, tamaño - len(palabra))
-            if all(cuadrícula[fila][col + i] in ('', palabra[i]) for i in range(len(palabra))):
-                for i in range(len(palabra)):
-                    cuadrícula[fila][col + i] = palabra[i]
-                colocada = True
+def main():
+    """Genera una sopa de letras de nivel avanzado."""
 
-        elif orientacion == 'V':  # Vertical
-            fila = random.randint(0, tamaño - len(palabra))
-            col = random.randint(0, tamaño - 1)
-            if all(cuadrícula[fila + i][col] in ('', palabra[i]) for i in range(len(palabra))):
-                for i in range(len(palabra)):
-                    cuadrícula[fila + i][col] = palabra[i]
-                colocada = True
+    # Palabras de Harry Potter
+    palabras = [
+        "HARRY", "HERMIONE", "RON", "DUMBLEDORE", "VOLDEMORT", "SNAPE",
+        "EXPELLIARMUS", "LUMOS", "ACCIO", "WINGARDIUM", "EXPECTO",
+        "PATRONUM", "CRUCIO", "SECTUMSEMPRA", "BELLATRIX", "DRACO"
+    ]
 
-        elif orientacion == 'D':  # Diagonal (de arriba izquierda a abajo derecha)
-            fila = random.randint(0, tamaño - len(palabra))
-            col = random.randint(0, tamaño - len(palabra))
-            if all(cuadrícula[fila + i][col + i] in ('', palabra[i]) for i in range(len(palabra))):
-                for i in range(len(palabra)):
-                    cuadrícula[fila + i][col + i] = palabra[i]
-                colocada = True
+    print("🎯 Generando sopa de letras - Nivel Avanzado")
+    print(f"📝 Tema: Harry Potter")
+    print(f"📊 Palabras: {len(palabras)}")
+    print(f"🔤 Orientaciones: Todas (H, V, D + inversas)")
+    print(f"⚠️  Palabras pueden aparecer invertidas aleatoriamente")
+    print()
 
-        elif orientacion == 'H_INV':  # Horizontal Inversa (de derecha a izquierda)
-            fila = random.randint(0, tamaño - 1)
-            col = random.randint(len(palabra) - 1, tamaño - 1)
-            if all(cuadrícula[fila][col - i] in ('', palabra[i]) for i in range(len(palabra))):
-                for i in range(len(palabra)):
-                    cuadrícula[fila][col - i] = palabra[i]
-                colocada = True
+    # Crear generador con configuración avanzada
+    generador = WordSearchGenerator(
+        palabras=palabras,
+        tamaño=15,
+        orientaciones=Config.ORIENTACIONES_AVANZADO,  # Todas las direcciones
+        alfabeto=Config.ALFABETO_EN,  # Alfabeto inglés
+        permitir_inversa=True  # Palabras pueden aparecer al revés
+    )
 
-        elif orientacion == 'V_INV':  # Vertical Inversa (de abajo hacia arriba)
-            fila = random.randint(len(palabra) - 1, tamaño - 1)
-            col = random.randint(0, tamaño - 1)
-            if all(cuadrícula[fila - i][col] in ('', palabra[i]) for i in range(len(palabra))):
-                for i in range(len(palabra)):
-                    cuadrícula[fila - i][col] = palabra[i]
-                colocada = True
+    # Generar la sopa
+    try:
+        print("⏳ Generando...")
+        generador.generar()
 
-        elif orientacion == 'D_INV':  # Diagonal Inversa (de abajo derecha a arriba izquierda)
-            fila = random.randint(len(palabra) - 1, tamaño - 1)
-            col = random.randint(len(palabra) - 1, tamaño - 1)
-            if all(cuadrícula[fila - i][col - i] in ('', palabra[i]) for i in range(len(palabra))):
-                for i in range(len(palabra)):
-                    cuadrícula[fila - i][col - i] = palabra[i]
-                colocada = True
+        # Exportar imagen
+        nombre_archivo = 'sopa_de_letras_avanzado.png'
+        generador.exportar_imagen(nombre_archivo)
 
-# Colocar todas las palabras en la cuadrícula
-for palabra in palabras:
-    colocar_palabra(palabra)
+        # Exportar soluciones
+        generador.exportar_solucion('sopa_de_letras_avanzado_solucion.txt')
 
-# Llenar espacios vacíos con letras aleatorias
-for fila in range(tamaño):
-    for col in range(tamaño):
-        if cuadrícula[fila][col] == '':
-            cuadrícula[fila][col] = random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+        # Mostrar estadísticas
+        stats = generador.obtener_estadisticas()
+        print("\n✅ ¡Sopa de letras generada exitosamente!")
+        print(f"\n📊 Estadísticas:")
+        print(f"   • Palabras colocadas: {stats['palabras_colocadas']}/{stats['total_palabras']}")
+        print(f"   • Tamaño: {stats['tamaño_cuadricula']}x{stats['tamaño_cuadricula']}")
+        print(f"   • Palabras invertidas: {stats['palabras_invertidas']}")
+        print(f"   • Orientaciones usadas:")
+        for orientacion, cantidad in stats['orientaciones_usadas'].items():
+            print(f"     - {orientacion}: {cantidad}")
+        print(f"\n💾 Archivos generados:")
+        print(f"   • {nombre_archivo}")
+        print(f"   • sopa_de_letras_avanzado_solucion.txt")
 
-# Crear imagen de la sopa de letras
-imagen_tamaño = 600
-cell_size = imagen_tamaño // tamaño
-imagen = Image.new('RGB', (imagen_tamaño, imagen_tamaño + 150), 'white')
-draw = ImageDraw.Draw(imagen)
-font = ImageFont.load_default()
+        # Mostrar la imagen
+        print("\n🖼️  Mostrando imagen...")
+        from PIL import Image
+        img = Image.open(nombre_archivo)
+        img.show()
 
-# Dibujar las líneas horizontales y verticales
-for i in range(tamaño + 1):
-    # Líneas horizontales
-    draw.line([(0, i * cell_size), (imagen_tamaño, i * cell_size)], fill='black')
-    # Líneas verticales
-    draw.line([(i * cell_size, 0), (i * cell_size, imagen_tamaño)], fill='black')
+    except ValueError as e:
+        print(f"\n❌ Error: {e}")
+        print("💡 Intenta aumentar el tamaño de la cuadrícula o reducir palabras.")
 
-# Dibujar letras en la cuadrícula, centradas en cada celda
-for fila in range(tamaño):
-    for col in range(tamaño):
-        letra = cuadrícula[fila][col]
-        # Usar textbbox para calcular el tamaño del texto
-        bbox = draw.textbbox((0, 0), letra, font=font)
-        ancho_letra = bbox[2] - bbox[0]
-        alto_letra = bbox[3] - bbox[1]
-        x = col * cell_size + (cell_size - ancho_letra) // 2  # Centrar horizontalmente
-        y = fila * cell_size + (cell_size - alto_letra) // 2  # Centrar verticalmente
-        draw.text((x, y), letra, font=font, fill='black')
 
-# Dibujar las palabras debajo de la cuadrícula con [ ]
-palabra_x = 10
-palabra_y = imagen_tamaño + 10
-for palabra in palabras:
-    draw.text((palabra_x, palabra_y), f"[     ]   {palabra}", font=font, fill='black')
-    palabra_y += 15
-    if palabra_y > imagen_tamaño + 120:
-        palabra_y = imagen_tamaño + 10
-        palabra_x += 200
-
-# Guardar imagen
-imagen.save('sopa_de_letras.png')
-
-# Mostrar imagen
-imagen.show()
+if __name__ == "__main__":
+    main()

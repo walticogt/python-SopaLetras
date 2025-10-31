@@ -1,86 +1,74 @@
-import random
-from PIL import Image, ImageDraw, ImageFont
+#!/usr/bin/env python3
+"""
+Ejemplo de nivel básico: Sopa de letras con orientaciones horizontales y verticales.
+Tema: Derechos y valores.
 
-# Configuración de la sopa de letras
-palabras = [
-    "HARRY", "HERMIONE", "RON", "DUMBLEDORE", "VOLDEMORT", "SNAPE", "EXPELLIARMUS", 
-    "LUMOS", "ACCIO", "WINGARDIUM", "EXPECTO", "PATRONUM", "CRUCIO", "SECTUMSEMPRA", 
-    "BELLATRIX", "DRACO"
-]
-tamaño = 15  # Tamaño de la cuadrícula (15x15)
+Este archivo demuestra cómo usar el generador para crear una sopa simple.
+"""
 
-# Crear cuadrícula vacía
-cuadrícula = [['' for _ in range(tamaño)] for _ in range(tamaño)]
+from word_search_generator import WordSearchGenerator
+from config import Config
 
-# Función para colocar palabras en la cuadrícula
-def colocar_palabra(palabra):
-    orientaciones = ['H', 'V']  # Horizontal, Vertical
-    colocada = False
-    while not colocada:
-        orientacion = random.choice(orientaciones)
-        if orientacion == 'H':
-            fila = random.randint(0, tamaño - 1)
-            col = random.randint(0, tamaño - len(palabra))
-            if all(cuadrícula[fila][col + i] in ('', palabra[i]) for i in range(len(palabra))):
-                for i in range(len(palabra)):
-                    cuadrícula[fila][col + i] = palabra[i]
-                colocada = True
-        elif orientacion == 'V':
-            fila = random.randint(0, tamaño - len(palabra))
-            col = random.randint(0, tamaño - 1)
-            if all(cuadrícula[fila + i][col] in ('', palabra[i]) for i in range(len(palabra))):
-                for i in range(len(palabra)):
-                    cuadrícula[fila + i][col] = palabra[i]
-                colocada = True
 
-# Colocar todas las palabras en la cuadrícula
-for palabra in palabras:
-    colocar_palabra(palabra)
+def main():
+    """Genera una sopa de letras de nivel básico."""
 
-# Llenar espacios vacíos con letras aleatorias
-for fila in range(tamaño):
-    for col in range(tamaño):
-        if cuadrícula[fila][col] == '':
-            cuadrícula[fila][col] = random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+    # Palabras sobre derechos y valores
+    palabras = [
+        "IGUALDAD", "RESPETO", "DIVERSIDAD", "EMPATIA", "JUSTICIA",
+        "PROTECCION", "EDUCACION", "SALUD", "DIGNIDAD", "INTEGRACION",
+        "ACCESIBILIDAD", "PARTICIPACION", "SOLIDARIDAD", "TOLERANCIA",
+        "BIENESTAR"
+    ]
 
-# Crear imagen de la sopa de letras
-imagen_tamaño = 600
-cell_size = imagen_tamaño // tamaño
-imagen = Image.new('RGB', (imagen_tamaño, imagen_tamaño + 150), 'white')
-draw = ImageDraw.Draw(imagen)
-font = ImageFont.load_default()
+    print("🎯 Generando sopa de letras - Nivel Básico")
+    print(f"📝 Tema: Derechos y Valores")
+    print(f"📊 Palabras: {len(palabras)}")
+    print(f"🔤 Orientaciones: Horizontal y Vertical")
+    print()
 
-# Dibujar las líneas horizontales y verticales
-for i in range(tamaño + 1):
-    # Líneas horizontales
-    draw.line([(0, i * cell_size), (imagen_tamaño, i * cell_size)], fill='black')
-    # Líneas verticales
-    draw.line([(i * cell_size, 0), (i * cell_size, imagen_tamaño)], fill='black')
+    # Crear generador con configuración básica
+    generador = WordSearchGenerator(
+        palabras=palabras,
+        tamaño=18,  # Cuadrícula un poco más grande por las palabras largas
+        orientaciones=Config.ORIENTACIONES_BASICO,  # Solo H y V
+        alfabeto=Config.ALFABETO_ES,  # Usar alfabeto español
+        permitir_inversa=False  # Sin palabras invertidas
+    )
 
-# Dibujar letras en la cuadrícula, centradas en cada celda
-for fila in range(tamaño):
-    for col in range(tamaño):
-        letra = cuadrícula[fila][col]
-        # Usar textbbox para calcular el tamaño del texto
-        bbox = draw.textbbox((0, 0), letra, font=font)
-        ancho_letra = bbox[2] - bbox[0]
-        alto_letra = bbox[3] - bbox[1]
-        x = col * cell_size + (cell_size - ancho_letra) // 2  # Centrar horizontalmente
-        y = fila * cell_size + (cell_size - alto_letra) // 2  # Centrar verticalmente
-        draw.text((x, y), letra, font=font, fill='black')
+    # Generar la sopa
+    try:
+        print("⏳ Generando...")
+        generador.generar()
 
-# Dibujar las palabras debajo de la cuadrícula con [ ]
-palabra_x = 10
-palabra_y = imagen_tamaño + 10
-for palabra in palabras:
-    draw.text((palabra_x, palabra_y), f"[    ]   {palabra}", font=font, fill='black')
-    palabra_y += 15
-    if palabra_y > imagen_tamaño + 120:
-        palabra_y = imagen_tamaño + 10
-        palabra_x += 200
+        # Exportar imagen
+        nombre_archivo = 'sopa_de_letras_basico.png'
+        generador.exportar_imagen(nombre_archivo)
 
-# Guardar imagen
-imagen.save('sopa_de_letras_centrada.png')
+        # Exportar soluciones
+        generador.exportar_solucion('sopa_de_letras_basico_solucion.txt')
 
-# Mostrar imagen
-imagen.show()
+        # Mostrar estadísticas
+        stats = generador.obtener_estadisticas()
+        print("\n✅ ¡Sopa de letras generada exitosamente!")
+        print(f"\n📊 Estadísticas:")
+        print(f"   • Palabras colocadas: {stats['palabras_colocadas']}/{stats['total_palabras']}")
+        print(f"   • Tamaño: {stats['tamaño_cuadricula']}x{stats['tamaño_cuadricula']}")
+        print(f"   • Orientaciones usadas: {list(stats['orientaciones_usadas'].keys())}")
+        print(f"\n💾 Archivos generados:")
+        print(f"   • {nombre_archivo}")
+        print(f"   • sopa_de_letras_basico_solucion.txt")
+
+        # Mostrar la imagen
+        print("\n🖼️  Mostrando imagen...")
+        from PIL import Image
+        img = Image.open(nombre_archivo)
+        img.show()
+
+    except ValueError as e:
+        print(f"\n❌ Error: {e}")
+        print("💡 Intenta aumentar el tamaño de la cuadrícula o reducir palabras.")
+
+
+if __name__ == "__main__":
+    main()
