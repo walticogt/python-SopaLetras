@@ -26,7 +26,7 @@ Un generador modular, extensible y fácil de usar para crear sopas de letras (wo
 1. Clona el repositorio:
 
 ```bash
-git clone https://github.com/tu-usuario/python-SopaLetras.git
+git clone https://github.com/walticogt/python-SopaLetras.git
 cd python-SopaLetras
 ```
 
@@ -247,7 +247,7 @@ Este proyecto está bajo la Licencia MIT. Ver archivo `LICENSE` para más detall
 
 ## 👨‍💻 Autor
 
-Desarrollado con ❤️ por [Tu Nombre]
+Desarrollado con ❤️ por Oscar Huanca
 
 ## 🙏 Agradecimientos
 
@@ -258,3 +258,4 @@ Desarrollado con ❤️ por [Tu Nombre]
 ---
 
 ⭐ Si este proyecto te fue útil, considera darle una estrella en GitHub!
+
